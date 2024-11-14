@@ -9,6 +9,7 @@ from itertools import groupby
 
 import string
 
+
 #
 # Escriba la función load_input que recive como parámetro un folder y retorna
 # una lista de tuplas donde el primer elemento de cada tupla es el nombre del
@@ -26,26 +27,28 @@ import string
 #
 def load_input(input_directory):
     """Funcion load_input"""
-    sequence=[]
-    files = glob.glob(f"{input_directory}/+")
+    sequences = []
+    files =glob.glob(f"{input_directory}/*")
     with fileinput.input(files=files) as f:
         for line in f:
-            sequence.append((fileinput.filename(), line))
-    return files
+            sequences.append((fileinput.filename(), line))
+    return sequences
+
 
 #
 # Escriba la función line_preprocessing que recibe una lista de tuplas de la
 # función anterior y retorna una lista de tuplas (clave, valor). Esta función
 # realiza el preprocesamiento de las líneas de texto,
 #
-
 def line_preprocessing(sequence):
     """Line Preprocessing"""
-    sequence = [
-        (key, value.translate(str.maketrans("", "", string.punctuation)).lower().strip().strip())
+    sequence=[
+        (key, value.translate(str.maketrans("","",string.punctuation)).lower())
         for key, value in sequence
     ]
     return sequence
+
+
 
 #
 # Escriba una función llamada maper que recibe una lista de tuplas de la
@@ -59,11 +62,10 @@ def line_preprocessing(sequence):
 #     ...
 #   ]
 #
-
 def mapper(sequence):
     """Mapper"""
+    return[(word,1) for _, value in sequence for word in value.split()]
 
-    return [(word, 1) for _, value in sequence for word in value.split()]
 
 #
 # Escriba la función shuffle_and_sort que recibe la lista de tuplas entregada
@@ -76,11 +78,10 @@ def mapper(sequence):
 #     ...
 #   ]
 #
-
 def shuffle_and_sort(sequence):
     """Shuffle and Sort"""
+    return sorted(sequence, key= lambda x: x[0])
 
-    return sorted(sequence, key= lambda x:(0))
 
 #
 # Escriba la función reducer, la cual recibe el resultado de shuffle_and_sort y
@@ -88,28 +89,28 @@ def shuffle_and_sort(sequence):
 # ejemplo, la reducción indica cuantas veces aparece la palabra analytics en el
 # texto.
 #
-
 def reducer(sequence):
     """Reducer"""
-    result = {}
+    result ={}
     for key, value in sequence:
         if key not in result.keys():
-            result[key] = 0
+            result[key]=0
         result[key] += value
     return list(result.items())
- 
+
 #
 # Escriba la función create_ouptput_directory que recibe un nombre de
 # directorio y lo crea. Si el directorio existe, lo borra
 #
-
 def create_ouptput_directory(output_directory):
     """Create Output Directory"""
     if os.path.exists(output_directory):
-        for file in glob.glob(f"{output_directory}/+"):
+        for file in glob.glob(f"{output_directory}/*"):
             os.remove(file)
         os.rmdir(output_directory)
     os.makedirs(output_directory)
+
+
 
 #
 # Escriba la función save_output, la cual almacena en un archivo de texto
@@ -119,7 +120,6 @@ def create_ouptput_directory(output_directory):
 # elemento es la clave y el segundo el valor. Los elementos de la tupla están
 # separados por un tabulador.
 #
-
 def save_output(output_directory, sequence):
     """Save Output"""
     with open(f"{output_directory}/part-00000", "w", encoding="utf-8") as f:
@@ -131,7 +131,6 @@ def save_output(output_directory, sequence):
 # La siguiente función crea un archivo llamado _SUCCESS en el directorio
 # entregado como parámetro.
 #
-
 def create_marker(output_directory):
     """Create Marker"""
     with open(f"{output_directory}/_SUCCESS", "w", encoding="utf-8") as f:
@@ -141,16 +140,17 @@ def create_marker(output_directory):
 #
 # Escriba la función job, la cual orquesta las funciones anteriores.
 #
-
 def run_job(input_directory, output_directory):
     """Job"""
-    sequence = load_input(input_directory)
-    sequence = line_preprocessing(sequence)
+    sequence =load_input(input_directory)
+    sequence= line_preprocessing(sequence)
     sequence = mapper(sequence)
+    
     sequence = shuffle_and_sort(sequence)
+
     sequence = reducer(sequence)
     create_ouptput_directory(output_directory)
-    save_output(output_directory, sequence)
+    save_output(output_directory,sequence)
     create_marker(output_directory)
 
 if __name__ == "__main__":
